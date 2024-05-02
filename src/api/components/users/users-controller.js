@@ -8,12 +8,73 @@ const { errorResponder, errorTypes } = require('../../../core/errors');
  * @param {object} next - Express route middlewares
  * @returns {object} Response object or pass an error to the next route
  */
+
+// Fungsi untuk mengambil daftar pengguna dengan fitur pagination, filtering, dan sorting
 async function getUsers(request, response, next) {
   try {
-    const users = await usersService.getUsers();
-    return response.status(200).json(users);
+    /* 
+    Membaca query :
+      pageNumber = Menentukan halaman berapa yang ingin dibuka
+      pageSize = Menentukan berapa banyak user yang ingin ditunjukkan pada sebuah halaman
+    */
+    const pageNumber = parseInt(request.query.page_number);
+    const pageSize = parseInt(request.query.page_size);
+
+    /* 
+    Mendeklarasi :
+      searchType = Menentukan ingin melakukan search berdasarkan email / name
+      search = Menentukan apa yang ingin di cari / search
+      sortType = Menentukan ingin melakukan sort berdasarkan email / name
+      sortOrder = Menentukan ingin melakukan sort dengan asc / desc
+    */
+    let searchType = null;
+    let search = null;
+    let sortType = null;
+    let sortOrder = null;
+
+    // Memisahkan searchType dan search pada querry
+    if (request.query.search) {
+      const searchSplit = request.query.search.split(':');
+      if (searchSplit.length === 2) {
+        searchType = searchSplit[0];
+        search = searchSplit[1];
+      }
+    }
+
+    // Memisahkan sortType dan sortOrder pada querry
+    if (request.query.sort) {
+      const sortSplit = request.query.sort.split(':');
+      if (sortSplit.length === 2) {
+        sortType = sortSplit[0];
+        sortOrder = sortSplit[1];
+      }
+    }
+
+    // Memanggil fungsi getUsers dari usersService untuk mendapatkan data pengguna dan info halaman
+    const { data, pageInfo } = await usersService.getUsers(
+      pageNumber,
+      pageSize,
+      searchType,
+      search,
+      sortType,
+      sortOrder
+    );
+
+    // Mengembalikan data pengguna dan info halaman
+    return response.status(200).json({
+      page_number: pageNumber,
+      page_size: pageSize,
+      count: pageInfo.count,
+      total_pages: pageInfo.totalPages,
+      has_previous_page: pageInfo.previousPage,
+      has_next_page: pageInfo.nextPage,
+      data: data,
+    });
   } catch (error) {
-    return next(error);
+    // Jika terjadi kesalahan, lempar error ke penanganan kesalahan
+    throw new Error(
+      'Failed to fetch users data. Please use the input the correct querry.'
+    );
   }
 }
 

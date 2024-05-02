@@ -1,5 +1,30 @@
 const { User } = require('../../../models');
 
+// Pagintaion Function
+async function applyPagination(pageNumber, pageSize) {
+  const startIndex = (pageNumber - 1) * pageSize;
+  const endIndex = pageNumber * pageSize;
+  const users = await User.find({})
+    .skip(startIndex)
+    .limit(endIndex - startIndex);
+  return users;
+}
+
+// Filter Function
+async function applyFilter(users, filterFunction) {
+  return users.filter(filterFunction);
+}
+
+// Sort Function
+async function applySort(input, sortFunction) {
+  return users.sort(sortFunction);
+}
+// Total Users Function
+async function totalUsers() {
+  totalUsers = await User.countDocuments();
+  return totalUsers;
+}
+
 /**
  * Get a list of users
  * @returns {Promise}
@@ -89,4 +114,8 @@ module.exports = {
   deleteUser,
   getUserByEmail,
   changePassword,
+  totalUsers,
+  applyPagination,
+  applyFilter,
+  applySort,
 };
