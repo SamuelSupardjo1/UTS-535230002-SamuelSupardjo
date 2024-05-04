@@ -49,11 +49,19 @@ async function getUser(id) {
  * @param {string} password - Hashed password
  * @returns {Promise}
  */
-async function createUser(name, email, password) {
+async function createUser(
+  name,
+  email,
+  password,
+  attempts,
+  lastAttemptTimestamp
+) {
   return User.create({
     name,
     email,
     password,
+    attempts,
+    lastAttemptTimestamp,
   });
 }
 

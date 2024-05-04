@@ -1,5 +1,9 @@
 const usersRepository = require('./users-repository');
 const { hashPassword, passwordMatched } = require('../../../utils/password');
+const {
+  attempts,
+  lastAttemptTimestamp,
+} = require('../../../models/users-schema');
 
 // Fungsi untuk mengimplementasikan pagination, filtering, dan sorting
 async function getUsers(
@@ -114,12 +118,24 @@ async function getUser(id) {
  * @param {string} password - Password
  * @returns {boolean}
  */
-async function createUser(name, email, password) {
+async function createUser(
+  name,
+  email,
+  password,
+  attempts,
+  lastAttemptTimestamp
+) {
   // Hash password
   const hashedPassword = await hashPassword(password);
 
   try {
-    await usersRepository.createUser(name, email, hashedPassword);
+    await usersRepository.createUser(
+      name,
+      email,
+      hashedPassword,
+      attempts,
+      lastAttemptTimestamp
+    );
   } catch (err) {
     return null;
   }

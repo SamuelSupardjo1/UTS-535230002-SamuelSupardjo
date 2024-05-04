@@ -60,7 +60,12 @@ async function getUsers(request, response, next) {
       sortOrder
     );
 
-    // Mengembalikan data pengguna dan info halaman
+    // Mengembalikan data pengguna
+    if (!pageNumber && !pageSize) {
+      return response.status(200).json(data);
+    }
+
+    // Mengembalikan info halaman dan data pengguna yang menggunakan fitur pagination
     return response.status(200).json({
       page_number: pageNumber,
       page_size: pageSize,
@@ -113,6 +118,10 @@ async function createUser(request, response, next) {
     const password = request.body.password;
     const password_confirm = request.body.password_confirm;
 
+    // Mendeklarasi attempts dan lastAttemptTimestamp
+    const attempts = null;
+    const lastAttemptTimestamp = null;
+
     // Check confirmation password
     if (password !== password_confirm) {
       throw errorResponder(
@@ -130,7 +139,13 @@ async function createUser(request, response, next) {
       );
     }
 
-    const success = await usersService.createUser(name, email, password);
+    const success = await usersService.createUser(
+      name,
+      email,
+      password,
+      attempts,
+      lastAttemptTimestamp
+    );
     if (!success) {
       throw errorResponder(
         errorTypes.UNPROCESSABLE_ENTITY,
