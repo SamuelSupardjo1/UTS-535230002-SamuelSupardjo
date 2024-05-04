@@ -1,21 +1,13 @@
-const usersService = require('./users-service');
+const customersService = require('./customers-service');
 const { errorResponder, errorTypes } = require('../../../core/errors');
 
-/**
- * Handle get list of users request
- * @param {object} request - Express request object
- * @param {object} response - Express response object
- * @param {object} next - Express route middlewares
- * @returns {object} Response object or pass an error to the next route
- */
-
 // Fungsi untuk mengambil daftar pengguna dengan fitur pagination, filtering, dan sorting
-async function getUsers(request, response, next) {
+async function getCustomers(request, response, next) {
   try {
     /* 
     Membaca query :
       pageNumber = Menentukan halaman berapa yang ingin dibuka
-      pageSize = Menentukan berapa banyak user yang ingin ditunjukkan pada sebuah halaman
+      pageSize = Menentukan berapa banyak Customers yang ingin ditunjukkan pada sebuah halaman
     */
     const pageNumber = parseInt(request.query.page_number);
     const pageSize = parseInt(request.query.page_size);
@@ -49,9 +41,9 @@ async function getUsers(request, response, next) {
         sortOrder = sortSplit[1];
       }
     }
-
-    // Memanggil fungsi getUsers dari usersService untuk mendapatkan data pengguna dan info halaman
-    const { data, pageInfo } = await usersService.getUsers(
+    console.log('tes - control');
+    // Memanggil fungsi getCustomers dari customersService untuk mendapatkan data pengguna dan info halaman
+    const { data, pageInfo } = await customersService.getCustomers(
       pageNumber,
       pageSize,
       searchType,
@@ -59,6 +51,8 @@ async function getUsers(request, response, next) {
       sortType,
       sortOrder
     );
+    console.log(data);
+    console.log(pageInfo);
 
     // Mengembalikan data pengguna
     if (!pageNumber && !pageSize) {
@@ -78,49 +72,34 @@ async function getUsers(request, response, next) {
   } catch (error) {
     // Jika terjadi kesalahan, lempar error ke penanganan kesalahan
     throw new Error(
-      'Failed to fetch users data. Please input the correct querry.'
+      'Failed to fetch Customers data. Please use the input the correct querry.'
     );
   }
 }
 
-/**
- * Handle get user detail request
- * @param {object} request - Express request object
- * @param {object} response - Express response object
- * @param {object} next - Express route middlewares
- * @returns {object} Response object or pass an error to the next route
- */
-async function getUser(request, response, next) {
+async function getCustomer(request, response, next) {
   try {
-    const user = await usersService.getUser(request.params.id);
+    const customers = await customersService.getCustomer(request.params.id);
 
-    if (!user) {
-      throw errorResponder(errorTypes.UNPROCESSABLE_ENTITY, 'Unknown user');
+    if (!customers) {
+      throw errorResponder(
+        errorTypes.UNPROCESSABLE_ENTITY,
+        'Unknown customers'
+      );
     }
 
-    return response.status(200).json(user);
+    return response.status(200).json(customers);
   } catch (error) {
     return next(error);
   }
 }
 
-/**
- * Handle create user request
- * @param {object} request - Express request object
- * @param {object} response - Express response object
- * @param {object} next - Express route middlewares
- * @returns {object} Response object or pass an error to the next route
- */
-async function createUser(request, response, next) {
+async function createCustomers(request, response, next) {
   try {
     const name = request.body.name;
     const email = request.body.email;
     const password = request.body.password;
     const password_confirm = request.body.password_confirm;
-
-    // Mendeklarasi attempts dan lastAttemptTimestamp
-    const attempts = null;
-    const lastAttemptTimestamp = null;
 
     // Check confirmation password
     if (password !== password_confirm) {
@@ -131,7 +110,7 @@ async function createUser(request, response, next) {
     }
 
     // Email must be unique
-    const emailIsRegistered = await usersService.emailIsRegistered(email);
+    const emailIsRegistered = await customersService.emailIsRegistered(email);
     if (emailIsRegistered) {
       throw errorResponder(
         errorTypes.EMAIL_ALREADY_TAKEN,
@@ -139,17 +118,15 @@ async function createUser(request, response, next) {
       );
     }
 
-    const success = await usersService.createUser(
+    const success = await customersService.createCustomers(
       name,
       email,
-      password,
-      attempts,
-      lastAttemptTimestamp
+      password
     );
     if (!success) {
       throw errorResponder(
         errorTypes.UNPROCESSABLE_ENTITY,
-        'Failed to create user'
+        'Failed to create Customers'
       );
     }
 
@@ -159,21 +136,14 @@ async function createUser(request, response, next) {
   }
 }
 
-/**
- * Handle update user request
- * @param {object} request - Express request object
- * @param {object} response - Express response object
- * @param {object} next - Express route middlewares
- * @returns {object} Response object or pass an error to the next route
- */
-async function updateUser(request, response, next) {
+async function updateCustomers(request, response, next) {
   try {
     const id = request.params.id;
     const name = request.body.name;
     const email = request.body.email;
 
     // Email must be unique
-    const emailIsRegistered = await usersService.emailIsRegistered(email);
+    const emailIsRegistered = await customersService.emailIsRegistered(email);
     if (emailIsRegistered) {
       throw errorResponder(
         errorTypes.EMAIL_ALREADY_TAKEN,
@@ -181,11 +151,11 @@ async function updateUser(request, response, next) {
       );
     }
 
-    const success = await usersService.updateUser(id, name, email);
+    const success = await customersService.updateCustomers(id, name, email);
     if (!success) {
       throw errorResponder(
         errorTypes.UNPROCESSABLE_ENTITY,
-        'Failed to update user'
+        'Failed to update Customers'
       );
     }
 
@@ -195,22 +165,15 @@ async function updateUser(request, response, next) {
   }
 }
 
-/**
- * Handle delete user request
- * @param {object} request - Express request object
- * @param {object} response - Express response object
- * @param {object} next - Express route middlewares
- * @returns {object} Response object or pass an error to the next route
- */
-async function deleteUser(request, response, next) {
+async function deleteCustomers(request, response, next) {
   try {
     const id = request.params.id;
 
-    const success = await usersService.deleteUser(id);
+    const success = await customersService.deleteCustomers(id);
     if (!success) {
       throw errorResponder(
         errorTypes.UNPROCESSABLE_ENTITY,
-        'Failed to delete user'
+        'Failed to delete Customers'
       );
     }
 
@@ -220,13 +183,6 @@ async function deleteUser(request, response, next) {
   }
 }
 
-/**
- * Handle change user password request
- * @param {object} request - Express request object
- * @param {object} response - Express response object
- * @param {object} next - Express route middlewares
- * @returns {object} Response object or pass an error to the next route
- */
 async function changePassword(request, response, next) {
   try {
     // Check password confirmation
@@ -239,7 +195,7 @@ async function changePassword(request, response, next) {
 
     // Check old password
     if (
-      !(await usersService.checkPassword(
+      !(await customersService.checkPassword(
         request.params.id,
         request.body.password_old
       ))
@@ -247,7 +203,7 @@ async function changePassword(request, response, next) {
       throw errorResponder(errorTypes.INVALID_CREDENTIALS, 'Wrong password');
     }
 
-    const changeSuccess = await usersService.changePassword(
+    const changeSuccess = await customersService.changePassword(
       request.params.id,
       request.body.password_new
     );
@@ -266,10 +222,10 @@ async function changePassword(request, response, next) {
 }
 
 module.exports = {
-  getUsers,
-  getUser,
-  createUser,
-  updateUser,
-  deleteUser,
+  getCustomers,
+  getCustomer,
+  createCustomers,
+  updateCustomers,
+  deleteCustomers,
   changePassword,
 };

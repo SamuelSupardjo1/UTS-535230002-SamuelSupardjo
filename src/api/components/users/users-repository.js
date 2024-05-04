@@ -16,7 +16,7 @@ async function applyFilter(users, filterFunction) {
 }
 
 // Sort Function
-async function applySort(input, sortFunction) {
+async function applySort(users, sortFunction) {
   return users.sort(sortFunction);
 }
 // Total Users Function
