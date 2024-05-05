@@ -9,30 +9,40 @@ const route = express.Router();
 module.exports = (app) => {
   app.use('/customers', route);
 
-  // Get list of Customers
-  route.get('/', customersControllers.getCustomers);
-
-  // Create Customers
+  // Mmembuat customers baru
   route.post(
     '/',
     celebrate(customersValidators.createCustomers),
     customersControllers.createCustomers
   );
 
-  // Get Customers detail
+  // Membuat transaksi baru
+  route.post(
+    '/transaction',
+    celebrate(customersValidators.createTransaction),
+    customersControllers.createTransaction
+  );
+
+  // Mengembalikan data customers
+  route.get('/', customersControllers.getCustomers);
+
+  // Mengembalikan data customers menggunakan id
   route.get('/:id', customersControllers.getCustomer);
 
-  // Update Customers
+  // Mengembalikan data transaksi
+  route.get('/transaction', customersControllers.getCustomers);
+
+  // Mengubah data customers
   route.put(
     '/:id',
     celebrate(customersValidators.updateCustomers),
     customersControllers.updateCustomers
   );
 
-  // Delete Customers
+  // Menghapus seluruh data customers
   route.delete('/:id', customersControllers.deleteCustomers);
 
-  // Change password
+  // Mengubah password
   route.post(
     '/:id/change-password',
     celebrate(customersValidators.changePassword),

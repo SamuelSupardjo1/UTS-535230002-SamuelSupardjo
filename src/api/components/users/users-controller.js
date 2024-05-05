@@ -76,7 +76,7 @@ async function getUsers(request, response, next) {
       data: data,
     });
   } catch (error) {
-    // Jika terjadi kesalahan, lempar error ke penanganan kesalahan
+    // Jika terjadi kesalahan maka akan mengembalikan error
     throw new Error(
       'Failed to fetch users data. Please input the correct querry.'
     );

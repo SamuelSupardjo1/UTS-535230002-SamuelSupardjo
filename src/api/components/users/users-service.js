@@ -14,81 +14,76 @@ async function getUsers(
   sortType,
   sortOrder
 ) {
-  try {
-    // Mengimplementasikan Pagination
-    if (pageNumber && pageSize) {
-      // Jika user menggunakan fitur pagination pada querry maka akan mengembalikan semua user dengan fitur Pagination
-      users = await usersRepository.applyPagination(pageNumber, pageSize);
-    } else {
-      // Jika user tidak menggunakan fitur pagination pada querry maka akan mengembalikan semua user tanpa fitur Pagination
-      users = await usersRepository.getUsers();
+  // Mengimplementasikan Pagination
+  if (pageNumber && pageSize) {
+    // Jika user menggunakan fitur pagination pada querry maka akan mengembalikan semua user dengan fitur Pagination
+    users = await usersRepository.applyPagination(pageNumber, pageSize);
+  } else {
+    // Jika user tidak menggunakan fitur pagination pada querry maka akan mengembalikan semua user tanpa fitur Pagination
+    users = await usersRepository.getUsers();
+  }
+
+  // Mengimplementasikan Filtering
+  if (searchType && search) {
+    if (searchType === 'name' || searchType === 'email') {
+      // Membuat filterFunction untuk dapat memenuhi kriteria parameter .filter() pada userRepository
+      const filterFunction = (user) =>
+        user[searchType].toLowerCase().includes(search.toLowerCase());
+      // Jika user menggunakan fitur filter pada querry maka akan mengembalikan semua user yang sudah di filter
+      users = await usersRepository.applyFilter(users, filterFunction);
     }
+  }
 
-    // Mengimplementasikan Filtering
-    if (searchType && search) {
-      if (searchType === 'name' || searchType === 'email') {
-        // Membuat filterFunction untuk dapat memenuhi kriteria parameter .filter() pada userRepository
-        const filterFunction = (user) =>
-          user[searchType].toLowerCase().includes(search.toLowerCase());
-        // Jika user menggunakan fitur filter pada querry maka akan mengembalikan semua user yang sudah di filter
-        users = await usersRepository.applyFilter(users, filterFunction);
-      }
+  // Mengimplementasikan Sorting
+  if (sortType && sortOrder) {
+    if (sortType === 'name' || sortType === 'email') {
+      // Membuat sortFunction untuk dapat memenuhi kriteria parameter .sort() pada userRepository
+      const sortFunction = (a, b) => {
+        const aValue = a[sortType];
+        const bValue = b[sortType];
+
+        if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+        return 0;
+      };
+      // Jika user menggunakan fitur sort pada querry maka akan mengembalikan semua user yang sudah di sort
+      users = await usersRepository.applySort(users, sortFunction);
     }
+  }
 
-    // Mengimplementasikan Sorting
-    if (sortType && sortOrder) {
-      if (sortType === 'name' || sortType === 'email') {
-        // Membuat sortFunction untuk dapat memenuhi kriteria parameter .sort() pada userRepository
-        const sortFunction = (a, b) => {
-          const aValue = a[sortType];
-          const bValue = b[sortType];
-
-          if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
-          if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
-          return 0;
-        };
-        // Jika user menggunakan fitur sort pada querry maka akan mengembalikan semua user yang sudah di sort
-        users = await usersRepository.applySort(users, sortFunction);
-      }
-    }
-
-    /* 
+  /* 
     Memberikan informasi dalam halaman:
       totalUsers = mengembalikan jumlah semua user pada database
       totalPages = mengembalikan jumlah semua halaman yang ada
       hasPreviousPage = mengembalikan boolean apakah terdapat halaman sebelumnya
       hasNextPage = mengembalikan boolean apakah terdapat halaman setelahnya
   */
-    const totalUsers = await usersRepository.totalUsers();
-    const totalPages = Math.ceil(totalUsers / pageSize);
-    const hasPreviousPage = pageNumber > 1;
-    const hasNextPage = pageNumber < totalPages;
+  const totalUsers = await usersRepository.totalUsers();
+  const totalPages = Math.ceil(totalUsers / pageSize);
+  const hasPreviousPage = pageNumber > 1;
+  const hasNextPage = pageNumber < totalPages;
 
-    // Mengembalian informasi tentang halaman tersebut
-    pageInfo = {
-      count: totalUsers,
-      totalPages: totalPages,
-      previousPage: hasPreviousPage,
-      nextPage: hasNextPage,
-    };
+  // Mengembalian informasi tentang halaman tersebut
+  pageInfo = {
+    count: totalUsers,
+    totalPages: totalPages,
+    previousPage: hasPreviousPage,
+    nextPage: hasNextPage,
+  };
 
-    // Mengonversi data pengguna menjadi format yang diinginkan
-    const results = [];
-    for (let i = 0; i < users.length; i += 1) {
-      const user = users[i];
-      results.push({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      });
-    }
-
-    // Mengembalikan data dan pageInfo
-    return { data: results, pageInfo };
-  } catch (error) {
-    // Jika terjadi kesalahan, lempar error ke penanganan kesalahan
-    throw new Error('Failed to fetch users data. Please check the parameters.');
+  // Mengonversi data pengguna menjadi format yang diinginkan
+  const results = [];
+  for (let i = 0; i < users.length; i += 1) {
+    const user = users[i];
+    results.push({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    });
   }
+
+  // Mengembalikan data dan pageInfo
+  return { data: results, pageInfo };
 }
 
 /**

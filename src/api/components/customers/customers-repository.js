@@ -1,70 +1,63 @@
 const { Customers } = require('../../../models');
 
-// Pagintaion Function
+// Fungsi untuk mengupdate balance
+async function updateBalance(accountId, newBalance) {
+  return Customers.updateOne(
+    { accountId: accountId },
+    { $set: { balance: newBalance } }
+  );
+}
+
+// Fungsi untuk mengembalikan data Customers menggunakan parameter accountId
+async function getCustomersByAccountId(accountId) {
+  return Customers.findOne({ accountId });
+}
+
+// Fungsi untuk mengimplementasi pagination
 async function applyPagination(pageNumber, pageSize) {
   const startIndex = (pageNumber - 1) * pageSize;
   const endIndex = pageNumber * pageSize;
-  const customers = await Customers.find({})
-    .skip(startIndex)
-    .limit(endIndex - startIndex);
+  const customers = await Customers.find({}).skip(startIndex).limit(endIndex);
   return customers;
 }
 
-// Filter Function
+// Fungsi untuk mengimplementasi filter
 async function applyFilter(customers, filterFunction) {
   return customers.filter(filterFunction);
 }
 
-// Sort Function
+// Fungsi untuk mengimplemenatasi sort
 async function applySort(customers, sortFunction) {
   return customers.sort(sortFunction);
 }
-// Total customers Function
+// Fungsi untuk mengembalikan jumlah Customers
 async function totalCustomers() {
   totalCustomers = await Customers.countDocuments();
   return totalCustomers;
 }
 
-/**
- * Get a list of Customers
- * @returns {Promise}
- */
+// Fungsi untuk mendapatkan list customers
 async function getCustomers() {
-  console.log('tes - repo');
   return Customers.find({});
 }
 
-/**
- * Get Customers detail
- * @param {string} id - Customers ID
- * @returns {Promise}
- */
+// Fungsi untuk mendapatkan list customers menggunakan id
 async function getCustomer(id) {
   return Customers.findById(id);
 }
 
-/**
- * Create new Customers
- * @param {string} name - Name
- * @param {string} email - Email
- * @param {string} password - Hashed password
- * @returns {Promise}
- */
-async function createCustomers(name, email, password) {
+// Membuat data Customers baru
+async function createCustomers(name, email, password, accountId, balance) {
   return Customers.create({
     name,
     email,
     password,
+    accountId,
+    balance,
   });
 }
 
-/**
- * Update existing Customers
- * @param {string} id - Customers ID
- * @param {string} name - Name
- * @param {string} email - Email
- * @returns {Promise}
- */
+// Mengubah data Customers
 async function updateCustomers(id, name, email) {
   return Customers.updateOne(
     {
@@ -79,30 +72,17 @@ async function updateCustomers(id, name, email) {
   );
 }
 
-/**
- * Delete a Customers
- * @param {string} id - Customers ID
- * @returns {Promise}
- */
+// Menghapus seluruh data Customers
 async function deleteCustomers(id) {
   return Customers.deleteOne({ _id: id });
 }
 
-/**
- * Get Customers by email to prevent duplicate email
- * @param {string} email - Email
- * @returns {Promise}
- */
+// Mendapatkan data Customers menggunakan email
 async function getCustomersByEmail(email) {
   return Customers.findOne({ email });
 }
 
-/**
- * Update Customers password
- * @param {string} id - Customers ID
- * @param {string} password - New hashed password
- * @returns {Promise}
- */
+// Mengubah password Customers
 async function changePassword(id, password) {
   return Customers.updateOne({ _id: id }, { $set: { password } });
 }
@@ -119,4 +99,6 @@ module.exports = {
   applyPagination,
   applyFilter,
   applySort,
+  getCustomersByAccountId,
+  updateBalance,
 };

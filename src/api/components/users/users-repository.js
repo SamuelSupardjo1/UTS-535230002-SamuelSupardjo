@@ -1,25 +1,23 @@
 const { User } = require('../../../models');
 
-// Pagintaion Function
+// Fungsi untuk mengimplementasikan pagination
 async function applyPagination(pageNumber, pageSize) {
   const startIndex = (pageNumber - 1) * pageSize;
   const endIndex = pageNumber * pageSize;
-  const users = await User.find({})
-    .skip(startIndex)
-    .limit(endIndex - startIndex);
+  const users = await User.find({}).skip(startIndex).limit(endIndex);
   return users;
 }
 
-// Filter Function
+// Fungsi untuk mengimplementasikan filter
 async function applyFilter(users, filterFunction) {
   return users.filter(filterFunction);
 }
 
-// Sort Function
+// Fungsi untuk mengimplementasikan sort
 async function applySort(users, sortFunction) {
   return users.sort(sortFunction);
 }
-// Total Users Function
+// Fungsi untuk mengimplementasikan total users
 async function totalUsers() {
   totalUsers = await User.countDocuments();
   return totalUsers;
